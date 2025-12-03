@@ -18,44 +18,24 @@ import { PostulacionesModule } from './postulaciones/postulaciones.module';
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
-        const dbHost = process.env.DB_HOST || 'localhost';
-        const dbPort = parseInt(process.env.DB_PORT || '1433');
-        const dbUser = process.env.DB_USERNAME || 'sa';
-        const dbPassword = process.env.DB_PASSWORD || '';
-        const dbName = process.env.DB_DATABASE || 'cuidar';
+        const dbHost = process.env.MYSQL_ADDON_HOST;
+        const dbPort = parseInt(process.env.MYSQL_ADDON_PORT || '3306');
+        const dbUser = process.env.MYSQL_ADDON_USER;
+        const dbPassword = process.env.MYSQL_ADDON_PASSWORD;
+        const dbName = process.env.MYSQL_ADDON_DB;
 
-
-        const hostParts = dbHost.split('\\');
-        const hostName = hostParts[0];
-        const instanceName = hostParts.length > 1 ? hostParts[1] : null;
-
-        const config: any = {
-          type: 'mssql',
-          host: hostName,
+        return {
+          type: 'mysql',
+          host: dbHost,
           port: dbPort,
           username: dbUser,
           password: dbPassword,
           database: dbName,
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: false,
-          options: {
-            encrypt: false,
-            trustServerCertificate: true,
-            enableArithAbort: true,
-            connectTimeout: 60000,
-          },
-          extra: {
-            requestTimeout: 60000,
-          },
           retryAttempts: 3,
           retryDelay: 5000,
         };
-
-        if (instanceName) {
-          config.options.instanceName = instanceName;
-        } 
-          
-        return config;
       },
     }),
     AuthModule,
