@@ -23,6 +23,8 @@ async function bootstrap() {
         'http://localhost:5174',
         'http://localhost:5175',
         'http://localhost:5180',
+        'https://testdeploy-kgdh.onrender.com', // Backend
+        'https://TU_NOMBRE_DEL_PROYECTO.vercel.app' // Frontend en Vercel (ajusta esto con la URL verdadera cuando la tengas)
       ];
       
       if (!origin || allowedOrigins.includes(origin)) {
