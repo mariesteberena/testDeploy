@@ -23,7 +23,7 @@ import { PostulacionesModule } from './postulaciones/postulaciones.module';
         const dbUser = process.env.MYSQL_ADDON_USER;
         const dbPassword = process.env.MYSQL_ADDON_PASSWORD;
         const dbName = process.env.MYSQL_ADDON_DB;
-
+    
         return {
           type: 'mysql',
           host: dbHost,
@@ -35,9 +35,13 @@ import { PostulacionesModule } from './postulaciones/postulaciones.module';
           synchronize: false,
           retryAttempts: 3,
           retryDelay: 5000,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         };
       },
     }),
+    
     AuthModule,
     UsersModule,
     RolesModule,
