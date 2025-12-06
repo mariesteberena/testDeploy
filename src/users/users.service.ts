@@ -260,25 +260,18 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Eliminar primero las relaciones para evitar errores de foreign key
-    
-    // 1. Eliminar postulaciones donde el usuario es familia
     await this.postulacionRepository.delete({ IdFamilia: usuario.IdUsuario });
     
-    // 2. Buscar si el usuario tiene un perfil de cuidador
     const cuidador = await this.cuidadorRepository.findOne({
       where: { IdUsuario: usuario.IdUsuario },
     });
     
     if (cuidador) {
-      // 3. Eliminar postulaciones donde el usuario es cuidador
       await this.postulacionRepository.delete({ IdCuidador: cuidador.IdCuidador });
       
-      // 4. Eliminar el perfil de cuidador
       await this.cuidadorRepository.remove(cuidador);
     }
     
-    // 5. Eliminar la imagen del usuario si existe
     if (usuario.Imagen && usuario.Imagen.startsWith('/Imagenes/')) {
       try {
         const filename = usuario.Imagen.replace('/Imagenes/', '');
@@ -294,7 +287,6 @@ export class UsersService {
       }
     }
     
-    // 6. Finalmente eliminar el usuario
     await this.usuarioRepository.remove(usuario);
 
     return {
