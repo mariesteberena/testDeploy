@@ -11,6 +11,8 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { Usuario } from '../entities/usuario.entity';
 import { Rol } from '../entities/rol.entity';
+import { Cuidador } from '../entities/cuidador.entity';
+import { Postulacion } from '../entities/postulacion.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -21,6 +23,10 @@ export class UsersService {
     private usuarioRepository: Repository<Usuario>,
     @InjectRepository(Rol)
     private rolRepository: Repository<Rol>,
+    @InjectRepository(Cuidador)
+    private cuidadorRepository: Repository<Cuidador>,
+    @InjectRepository(Postulacion)
+    private postulacionRepository: Repository<Postulacion>,
   ) {}
 
   async findAll() {
@@ -254,6 +260,41 @@ export class UsersService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    // Eliminar primero las relaciones para evitar errores de foreign key
+    
+    // 1. Eliminar postulaciones donde el usuario es familia
+    await this.postulacionRepository.delete({ IdFamilia: usuario.IdUsuario });
+    
+    // 2. Buscar si el usuario tiene un perfil de cuidador
+    const cuidador = await this.cuidadorRepository.findOne({
+      where: { IdUsuario: usuario.IdUsuario },
+    });
+    
+    if (cuidador) {
+      // 3. Eliminar postulaciones donde el usuario es cuidador
+      await this.postulacionRepository.delete({ IdCuidador: cuidador.IdCuidador });
+      
+      // 4. Eliminar el perfil de cuidador
+      await this.cuidadorRepository.remove(cuidador);
+    }
+    
+    // 5. Eliminar la imagen del usuario si existe
+    if (usuario.Imagen && usuario.Imagen.startsWith('/Imagenes/')) {
+      try {
+        const filename = usuario.Imagen.replace('/Imagenes/', '');
+        const frontendPath = join(process.cwd(), '..', 'Tpe-CuidAr', 'public', 'Imagenes');
+        const filePath = join(frontendPath, filename);
+        
+        const defaultImages = ['Admin.png', 'Trabajador.jpg', 'Trabajadora1.avif', 'Familia.jpg', 'familia2.jpg'];
+        if (fs.existsSync(filePath) && !defaultImages.includes(filename)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (error) {
+        console.error('Error al eliminar imagen del usuario:', error);
+      }
+    }
+    
+    // 6. Finalmente eliminar el usuario
     await this.usuarioRepository.remove(usuario);
 
     return {

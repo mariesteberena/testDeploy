@@ -1,12 +1,16 @@
 import { Repository } from 'typeorm';
 import { Usuario } from '../entities/usuario.entity';
 import { Rol } from '../entities/rol.entity';
+import { Cuidador } from '../entities/cuidador.entity';
+import { Postulacion } from '../entities/postulacion.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 export declare class UsersService {
     private usuarioRepository;
     private rolRepository;
-    constructor(usuarioRepository: Repository<Usuario>, rolRepository: Repository<Rol>);
+    private cuidadorRepository;
+    private postulacionRepository;
+    constructor(usuarioRepository: Repository<Usuario>, rolRepository: Repository<Rol>, cuidadorRepository: Repository<Cuidador>, postulacionRepository: Repository<Postulacion>);
     findAll(): Promise<{
         success: boolean;
         users: {
